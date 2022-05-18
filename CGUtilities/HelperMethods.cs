@@ -86,5 +86,13 @@ namespace CGUtilities
         {
             return l.Start.Vector(l.End);
         }
+
+        //me
+        public static double Dist(Point p1, Point p2) //can implement it without sqrt
+        {
+            double dx = Math.Abs(p1.X - p2.X);
+            double dy = Math.Abs(p1.Y - p2.Y);
+            return Math.Sqrt(dx * dx + dy * dy);
+        }
     }
 }
