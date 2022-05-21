@@ -140,15 +140,8 @@ namespace CGAlgorithms.Algorithms.ConvexHull
             int ptr = 1;
             while (ptr < points.Count)
             {
-                if (points[ptr - 1].Equals(points[ptr]))
-                    points.Remove(points[ptr]);
-                else
-                    ptr++;
-            }
-            ptr = 1;
-            while(ptr + 1 < points.Count)
-            {
-                if (points[ptr].X - points[ptr - 1].X < 1e-6 && points[ptr + 1].X - points[ptr].X < 1e-6)
+                if (points[ptr - 1].Equals(points[ptr]) || 
+                    (ptr + 1 < points.Count && points[ptr].X - points[ptr - 1].X < 1e-6 && points[ptr + 1].X - points[ptr].X < 1e-6))
                     points.Remove(points[ptr]);
                 else
                     ptr++;
