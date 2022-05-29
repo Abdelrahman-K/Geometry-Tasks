@@ -86,43 +86,13 @@ namespace CGUtilities
         {
             return l.Start.Vector(l.End);
         }
-
-        //me
-        public static double Dist(Point p1, Point p2) //can implement it without sqrt
+        public static double DotProduct(Point a, Point b)
         {
-            double dx = Math.Abs(p1.X - p2.X);
-            double dy = Math.Abs(p1.Y - p2.Y);
-            return Math.Sqrt(dx * dx + dy * dy);
+            return a.X * b.X + a.Y * b.Y;
         }
-        public static int CCW(Point a, Point b, Point c)
+        public static double Distance(Point p1, Point p2)
         {
-            Point v1 = a.Vector(b), v2 = a.Vector(c);
-            double t = CrossProduct(v1, v2);
-            if (t > +1e-6) return 1;
-            if (t < -1e-6) return -1;
-            if (v1.X * v2.X < -1e-6 || v1.Y * v2.Y < -1e-6)
-                return -1;
-            Point O = Point.Identity;
-            if (Dist(v1, O) < Dist(v2, O) - 1e-6)
-                return 1;
-            return 0;
-        }
-        public static bool Is_segment_intersection(Line a, Line b)
-        {
-            return CCW(a.Start, a.End, b.Start) * CCW(a.Start, a.End, b.End) <= 0 &&
-                    CCW(b.Start, b.End, a.Start) * CCW(b.Start, b.End, a.End) <= 0;
-        }
-        public static Point Get_intersection(Line e, Line f)
-        {
-            double a1 = e.End.X - e.Start.X, a2 = e.End.Y - e.Start.Y;
-            double b1 = f.Start.X - f.End.X, b2 = f.Start.Y - f.End.Y;
-            double c1 = e.Start.X - f.Start.X, c2 = e.Start.Y - f.Start.Y;
-            Point ab1 = new Point(a1, b1);
-            Point ab2 = new Point(a2, b2);
-            Point bc1 = new Point(b1, c1);
-            Point bc2 = new Point(b2, c2);
-            double t1 = CrossProduct(bc1, bc2) / CrossProduct(ab1, ab2);
-            return new Point(e.Start.X + (e.End.X - e.Start.X) * t1, e.Start.Y + (e.End.Y - e.Start.Y) * t1);
+            return Math.Sqrt(Math.Abs(p1.X - p2.X) * Math.Abs(p1.X - p2.X) + Math.Abs(p1.Y - p2.Y) * Math.Abs(p1.Y - p2.Y));
         }
     }
 }

@@ -9,7 +9,7 @@ namespace CGUtilities
     /// <summary>
     /// The primary Point structure to be used in the CG project.
     /// </summary>
-    public class Point : ICloneable
+    public class Point : ICloneable, IComparable
     {
         /// <summary>
         /// Creates a point structure with the given coordinates.
@@ -77,6 +77,33 @@ namespace CGUtilities
         public object Clone()
         {
             return new Point(X, Y);
+        }
+
+
+        public double Ang {
+            get;
+            set;
+        }
+        public bool Flag
+        {
+            get;
+            set;
+        }
+        public int CompareTo(object obj)
+        {
+            if (Flag == false)
+            {
+                if (this.Ang.CompareTo(((Point)obj).Ang) == 0)
+                {
+                    if (this.Y.CompareTo(((Point)obj).Y) == 0)
+                        return this.X.CompareTo(((Point)obj).X);
+                    return this.Y.CompareTo(((Point)obj).Y);
+                }
+                return this.Ang.CompareTo(((Point)obj).Ang);
+            }
+            if (this.X.CompareTo(((Point)obj).X) == 0)
+                return this.Y.CompareTo(((Point)obj).Y);
+            return this.X.CompareTo(((Point)obj).X);
         }
     }
 }

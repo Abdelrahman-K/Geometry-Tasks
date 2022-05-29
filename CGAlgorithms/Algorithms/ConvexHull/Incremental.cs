@@ -9,113 +9,80 @@ namespace CGAlgorithms.Algorithms.ConvexHull
 {
     public class Incremental : Algorithm
     {
-        public static bool Compare(Point p1, Point p2)
+        public int getNumb(int x, bool next)
         {
-            return p1.X < p2.X || (p1.X == p2.X && p1.Y < p2.Y);
+            if (next) return (x + 1) % 3;
+            else return (x - 1 + 3) % 3;
         }
-        public static void Merge_sort(ref List<Point> points)
+        public List<Point> buildSolution(int tempIdx, List<Point> points, int[] nextPoint)
         {
-            if (points.Count <= 1)
-                return;
-            List<Point> lt = new List<Point>();
-            List<Point> rt = new List<Point>();
-            for (int i = 0; i < points.Count; i++)
+            List<Point> ret = new List<Point>();
+            do
             {
-                if (i < points.Count / 2)
-                    lt.Add(points[i]);
-                else
-                    rt.Add(points[i]);
-            }
-            Merge_sort(ref lt);
-            Merge_sort(ref rt);
-            points.Clear();
-            int plt = 0, prt = 0;
-            while (plt < lt.Count && prt < rt.Count)
-            {
-                if (Compare(lt[plt], rt[prt]))
-                    points.Add(lt[plt++]);
-                else
-                    points.Add(rt[prt++]);
-            }
-            while (plt < lt.Count)
-                points.Add(lt[plt++]);
-            while (prt < rt.Count)
-                points.Add(rt[prt++]);
-        }
-        public static void Remove_duplicates(ref List<Point> points)
-        {
-            int ptr = 1;
-            while (ptr < points.Count)
-            {
-                if (points[ptr - 1].Equals(points[ptr]) ||
-                    (ptr + 1 < points.Count && points[ptr].X - points[ptr - 1].X < 1e-6 && points[ptr + 1].X - points[ptr].X < 1e-6))
-                    points.Remove(points[ptr]);
-                else
-                    ptr++;
-            }
+                ret.Add(points[tempIdx]);
+                tempIdx = nextPoint[tempIdx];
+            } while (points[tempIdx] != ret[0]);
+            return ret;
         }
         public override void Run(List<Point> points, List<Line> lines, List<Polygon> polygons, ref List<Point> outPoints, ref List<Line> outLines, ref List<Polygon> outPolygons)
         {
-            Merge_sort(ref points);
-            Remove_duplicates(ref points);
-            if (points.Count >= 3)
+            for (int i = 0; i < points.Count; i++) points[i].Flag = true;
+            points.Sort();
+            for (int i = 1; i < points.Count; i++)
             {
-                int[] prv = new int[points.Count];
-                int[] nxt = new int[points.Count];
-                int ptr = 2;
-                Line l = new Line(points[0], points[1]);
-                if (HelperMethods.CheckTurn(l, points[2]) != Enums.TurnType.Right)
+                if (points[i - 1].Equals(points[i]) ||
+                    (i + 1 < points.Count && points[i].X - points[i - 1].X < 1e-6 && points[i + 1].X - points[i].X < 1e-6))
                 {
-                    nxt[0] = 1; prv[0] = 2;
-                    nxt[1] = 2; prv[1] = 0;
-                    nxt[2] = 0; prv[2] = 1;
+                    points.RemoveAt(i);
+                    i--;
                 }
-                else
-                {
-                    nxt[0] = 2; prv[0] = 1;
-                    nxt[2] = 1; prv[2] = 0;
-                    nxt[1] = 0; prv[1] = 2;
-                }
-                for (int i = 3; i < points.Count; i++)
-                {
-                    int up, lw;
-                    while (true)
-                    {
-                        l = new Line(points[i], points[ptr]);
-                        if (HelperMethods.CheckTurn(l, points[nxt[ptr]]) == Enums.TurnType.Left)
-                        {
-                            up = ptr;
-                            break;
-                        }
-                        ptr = nxt[ptr];
-                    }
-                    ptr = i - 1;
-                    while (true)
-                    {
-                        l = new Line(points[i], points[ptr]);
-                        if (HelperMethods.CheckTurn(l, points[prv[ptr]]) == Enums.TurnType.Right)
-                        {
-                            lw = ptr;
-                            break;
-                        }
-                        ptr = prv[ptr];
-                    }
-                    prv[up] = i;
-                    nxt[lw] = i;
-                    nxt[i] = up;
-                    prv[i] = lw;
-                    ptr = i;
-                }
-                do
-                {
-                    outPoints.Add(points[ptr]);
-                    ptr = nxt[ptr];
-                } while (points[ptr] != outPoints[0]);
             }
-            else
+            if(points.Count <= 3)
+            {
                 outPoints = points;
+                return;
+            }
+            int[] prevPoint = new int[points.Count];
+            int[] nextPoint = new int[points.Count];
+            Line line = new Line(points[0], points[1]);
+            for (int idx = 0; idx <= 2; idx++)
+            {
+                nextPoint[idx] = getNumb(idx, (HelperMethods.CheckTurn(line, points[2]) != Enums.TurnType.Right) ? true : false);
+                prevPoint[idx] = getNumb(idx, (HelperMethods.CheckTurn(line, points[2]) != Enums.TurnType.Right) ? false : true);
+            }
+            int tempIdx = 2, upper, lower;
+            for (int i = 3; i < points.Count; i++)
+            {
+                while (true)
+                {
+                    line = new Line(points[i], points[tempIdx]);
+                    if (HelperMethods.CheckTurn(line, points[nextPoint[tempIdx]]) == Enums.TurnType.Left)
+                    {
+                        upper = tempIdx;
+                        break;
+                    }
+                    tempIdx = nextPoint[tempIdx];
+                }
+                tempIdx = i - 1;
+                while (true)
+                {
+                    line = new Line(points[i], points[tempIdx]);
+                    if (HelperMethods.CheckTurn(line, points[prevPoint[tempIdx]]) == Enums.TurnType.Right)
+                    {
+                        lower = tempIdx;
+                        break;
+                    }
+                    tempIdx = prevPoint[tempIdx];
+                }
+                prevPoint[upper] = i;
+                nextPoint[lower] = i;
+                nextPoint[i] = upper;
+                prevPoint[i] = lower;
+                tempIdx = i;
+            }
+            outPoints = buildSolution(tempIdx, points, nextPoint);
+            
         }
-
         public override string ToString()
         {
             return "Convex Hull - Incremental";
